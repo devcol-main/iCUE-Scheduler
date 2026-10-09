@@ -39,7 +39,7 @@ $script:toastTimer=New-Object Windows.Threading.DispatcherTimer; $script:toastTi
 $script:toastTimer.Add_Tick({ $script:toastTimer.Stop(); $Toast.Visibility='Collapsed' })
 function Show-Toast($msg,$kind='info'){
     $c=@{ok=@('#173A2E','#2C6B52'); err=@('#40212A','#7A3340'); warn=@('#3F3320','#80652E'); info=@('#232A3D','#3A4468')}[$kind]
-    $Toast.Background=Brush $c[0]; $Toast.BorderBrush=Brush $c[1]; $ToastText.Text=$msg; $Toast.Visibility='Visible'
+    $Toast.Background=Brush $c[0]; $Toast.BorderBrush=Brush $c[1]; $ToastText.Text=$msg; $Toast.Visibility='Visible'; $script:toastTimer.Interval=[TimeSpan]::FromSeconds($(if($kind -in 'warn','err'){7}else{4}))
     $script:toastTimer.Stop(); $script:toastTimer.Start()
 }
 function Safe([scriptblock]$b){ try{ & $b }catch{ Err-Log "$_ $($_.InvocationInfo.PositionMessage)"; Show-Toast ((T 'Err') + $_.Exception.Message) 'err' } }
@@ -186,9 +186,12 @@ $script:applyTimer.Add_Tick({
         $script:applyTimer.Stop(); $code=$script:applyProc.ExitCode
         $BtnApplySched.IsEnabled=$true; $BtnTemp.IsEnabled=$true; $BtnApplySched.Content=T 'Apply'; $BtnTemp.Content=T 'TempBtn'
         Render-Home
-        if($code -eq 0){ Show-Toast ((T 'Done') -f (T $script:applyWhat)) 'ok' } else { Show-Toast (T 'Failed') 'err' }
+        if($code -eq 0){ Show-Toast ((T 'Done') -f (T $script:applyWhat)) 'ok'; if($script:reqBL -ne $null){ $script:roundTimer.Start() } } else { Show-Toast (T 'Failed') 'err' }
     }
 })
+$script:reqBL=$null
+$script:roundTimer=New-Object Windows.Threading.DispatcherTimer; $script:roundTimer.Interval=[TimeSpan]::FromSeconds(12)
+$script:roundTimer.Add_Tick({ $script:roundTimer.Stop(); try{ $m=Check-Rounded $script:reqBL; if($m){ Show-Toast $m 'warn' }; Render-Home }catch{ Err-Log "round: $_" } })
 function Start-Apply($argText,$what){
     if($script:applyProc -and -not $script:applyProc.HasExited){ Show-Toast (T 'Busy') 'warn'; return }
     $BtnApplySched.IsEnabled=$false; $BtnTemp.IsEnabled=$false; $BtnApplySched.Content=T 'Applying'; $BtnTemp.Content=T 'Applying'
@@ -214,7 +217,7 @@ $TglEnabled.Add_Click({ Safe {
 }})
 $BtnTemp.Add_Click({ Safe {
     if(-not $script:tempSel){ Show-Toast (T 'ChooseProfile') 'warn'; return }
-    $b='keep'; if($tempBC.Value -ne $null){ $b="$($tempBC.Value)" }
+    $b='keep'; $script:reqBL=$null; if($tempBC.Value -ne $null){ $b="$($tempBC.Value)"; $script:reqBL=[int]$tempBC.Value }
     Start-Apply "-ProfileName `"$($script:tempSel)`" -Brightness $b" 'WhatManual'
 }})
 
@@ -241,7 +244,7 @@ $BtnDel.Add_Click({ Safe {
 $BtnSave.Add_Click({ Safe { Commit-Time; if(Save-Schedule){ Show-Toast (T 'Saved') 'ok' } } })
 $BtnApplySched.Add_Click({ Safe {
     if($script:dirty){ Show-Toast (T 'SaveFirst') 'warn'; return }
-    Start-Apply '-Force' 'WhatSched'
+    $script:reqBL=(Get-Current $script:conf).brightness; Start-Apply '-Force' 'WhatSched'
 }})
 
 $BtnFolder.Add_Click({ Start-Process explorer.exe $root })

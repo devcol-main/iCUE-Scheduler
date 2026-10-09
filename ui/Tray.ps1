@@ -44,7 +44,7 @@ function Render-Tray {
             $sub=''; if($slot){ $sub=Range-Of $c $slot.time }; if($p.Name -eq $act){ $sub=(@($sub,(T 'NowTag')) | ? { $_ }) -join ' · ' }
             $t2=New-Object Windows.Controls.TextBlock; $t2.Text=$sub; $t2.FontSize=10.5; $t2.Opacity=0.75; $t2.TextTrimming='CharacterEllipsis'
             [void]$sp.Children.Add($t1); [void]$sp.Children.Add($t2); $tb.Content=$sp
-            $tb.Add_Click({ param($sender,$ev) Run-Switch "-ProfileName `"$($sender.Tag)`" -Brightness keep" })
+            $tb.Add_Click({ param($sender,$ev) $script:reqBL=$null; Run-Switch "-ProfileName `"$($sender.Tag)`" -Brightness keep" })
             [void]$Tiles.Children.Add($tb)
         }
         if($ic -and $ic.BL -ne $null){ BC-Set $bcTray ([int]$ic.BL) }
@@ -69,15 +69,19 @@ function Open-Main { Start-Process wscript.exe -ArgumentList "`"$(Join-Path $roo
 
 # brightness: apply 0.9 s after the last change, to the current profile
 $script:brTimer=New-Object Windows.Threading.DispatcherTimer; $script:brTimer.Interval=[TimeSpan]::FromMilliseconds(900)
-$script:brTimer.Add_Tick({ $script:brTimer.Stop(); $act=Get-ActiveName (Get-IcueProfiles); if($act -and $bcTray.Value -ne $null){ Run-Switch "-ProfileName `"$act`" -Brightness $($bcTray.Value)" } })
+$script:brTimer.Add_Tick({ $script:brTimer.Stop(); $act=Get-ActiveName (Get-IcueProfiles); if($act -and $bcTray.Value -ne $null){ $script:reqBL=[int]$bcTray.Value; Run-Switch "-ProfileName `"$act`" -Brightness $($bcTray.Value)" } })
 $bcTray.OnChange={ param($c) if($script:rendering){ return }; $script:brTimer.Stop(); $script:brTimer.Start() }
 $script:procTimer=New-Object Windows.Threading.DispatcherTimer; $script:procTimer.Interval=[TimeSpan]::FromMilliseconds(700)
-$script:procTimer.Add_Tick({ if($script:proc -and $script:proc.HasExited){ $script:procTimer.Stop(); Set-Busy $false; Render-Tray } })
+$script:procTimer.Add_Tick({ if($script:proc -and $script:proc.HasExited){ $script:procTimer.Stop(); Set-Busy $false; Render-Tray; if($script:reqBL -ne $null){ $script:roundTimer.Start() } } })
+$script:reqBL=$null
+$script:hideStatus=New-Object Windows.Threading.DispatcherTimer; $script:hideStatus.Interval=[TimeSpan]::FromSeconds(8); $script:hideStatus.Add_Tick({ $script:hideStatus.Stop(); $Status.Visibility='Collapsed' })
+$script:roundTimer=New-Object Windows.Threading.DispatcherTimer; $script:roundTimer.Interval=[TimeSpan]::FromSeconds(12)
+$script:roundTimer.Add_Tick({ $script:roundTimer.Stop(); try{ $m=Check-Rounded $script:reqBL; Render-Tray; if($m){ $Status.Text=$m; $Status.Visibility='Visible'; $script:hideStatus.Start() } }catch{ Err-Log "tray round: $_" } })
 
 $pop.Add_Deactivated({ $pop.Hide(); $script:hiddenAt=Get-Date })
 $TglAuto.Add_Click({ $on=[bool]$TglAuto.IsChecked; $c=Load-Config; $c.enabled=$on; Write-Config $c; Render-Tray })
 $BtnOpen.Add_Click({ $pop.Hide(); Open-Main })
-$BtnApply.Add_Click({ Run-Switch '-Force' })
+$BtnApply.Add_Click({ $script:reqBL=(Get-Current (Load-Config)).brightness; Run-Switch '-Force' })
 
 # tray icon + menu
 $ni=New-Object System.Windows.Forms.NotifyIcon; $ni.Icon=$appIco; $ni.Visible=$true

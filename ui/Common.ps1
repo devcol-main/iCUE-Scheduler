@@ -18,7 +18,7 @@ $icueExe  = "$env:ProgramFiles\Corsair\Corsair iCUE5 Software\iCUE.exe"
 $taskName = 'iCUE Profile Scheduler'
 $RepoUrl  = 'https://github.com/devcol-main/iCUE-Scheduler'
 $script:lang = 'en'
-$Presets  = @(0,10,25,50,75,100)
+$Presets  = @(0,33,66,100)   # iCUE keyboard brightness steps (e.g. K70 RGB RAPIDFIRE)
 # timeline colors: gradient start, gradient end, label text, dot
 $Palette  = @(
     @('#14524A','#1A6B5F','#BFF3E6','#2FBFA4'), @('#3A2C74','#4A3699','#D8CEFF','#9B7BFF'),
@@ -46,7 +46,7 @@ $StrTable = @{
    AutoOnT='Auto switching on'; AutoOffT='Auto switching off'; CloseArm='Unsaved changes · press ✕ again to close'; Err='Error: '; ChooseProfile='Choose a profile'
    Rereged='Scheduled task re-registered'; TrayOnT='Tray widget started'; TrayOffT='Tray widget closed'; WhatSched='Schedule'; WhatManual='Temporary settings'
    DurHM='{0}h {1}m'; DurM='{0}m'; TrayOpen='Open iCUE Scheduler'; TrayApply='Apply schedule now'; TrayExit='Exit tray widget'
-   NowTag='now'; OpenWin='Open window'; ApplySchedShort='Apply schedule'; TrayTip='iCUE Scheduler · {0}' }
+   NowTag='now'; OpenWin='Open window'; ApplySchedShort='Apply schedule'; TrayTip='iCUE Scheduler · {0}'; BrHint='{0} · brightness has 4 steps: 0 / 33 / 66 / 100%'; BrHintGen='Keyboard brightness has 4 steps: 0 / 33 / 66 / 100%'; Rounded='iCUE applied {0}% · {1} supports 0 / 33 / 66 / 100% only' }
  ko = @{ Title='iCUE 스케줄러'; NavHome='홈'; NavSched='스케줄'; NavLog='기록'; NavSettings='설정'
    Now='지금'; BrightNow='키보드 밝기'; WhenFmt='{0} → {1} · {2} 후'; Match='● 스케줄과 일치'; ManualOn='● 임시 사용 중 · 다음 전환에서 복귀'
    AutoOffState='자동 전환 꺼짐'; Unknown='(알 수 없음)'; LegendFmt='{0} · 밝기 {1}'
@@ -66,7 +66,7 @@ $StrTable = @{
    AutoOnT='자동 전환을 켰습니다'; AutoOffT='자동 전환을 껐습니다'; CloseArm='저장하지 않은 변경이 있습니다 · ✕를 한 번 더 누르면 닫습니다'; Err='오류: '; ChooseProfile='프로필을 선택하세요'
    Rereged='작업 스케줄러를 다시 등록했습니다'; TrayOnT='트레이 위젯을 실행했습니다'; TrayOffT='트레이 위젯을 종료했습니다'; WhatSched='스케줄'; WhatManual='임시 설정'
    DurHM='{0}시간 {1}분'; DurM='{0}분'; TrayOpen='iCUE 스케줄러 열기'; TrayApply='지금 스케줄 적용'; TrayExit='트레이 위젯 종료'
-   NowTag='지금'; OpenWin='창 열기'; ApplySchedShort='스케줄 적용'; TrayTip='iCUE 스케줄러 · {0}' }
+   NowTag='지금'; OpenWin='창 열기'; ApplySchedShort='스케줄 적용'; TrayTip='iCUE 스케줄러 · {0}'; BrHint='{0} · 밝기는 0 / 33 / 66 / 100% 4단계만 지원합니다'; BrHintGen='키보드 밝기는 0 / 33 / 66 / 100% 4단계로 적용됩니다'; Rounded='{1} 지원 단계에 맞춰 {0}%로 적용되었습니다' }
 }
 function T($k){ $v=$StrTable[$script:lang][$k]; if($v -eq $null){ $v=$StrTable['en'][$k] }; $v }
 
@@ -201,7 +201,7 @@ function Icon-Source($icon){ [Windows.Interop.Imaging]::CreateBitmapSourceFromHI
 function New-BrightControl([bool]$showKeep,[bool]$stack){
     $segB=New-Object Windows.Controls.Border; $segB.Background=Res 'Card2'; $segB.CornerRadius=9; $segB.Padding='3'
     $ug=New-Object Windows.Controls.Primitives.UniformGrid; $ug.Rows=1; $segB.Child=$ug
-    $sl=New-Object Windows.Controls.Slider; $sl.Style=Res 'Slim'; $sl.VerticalAlignment='Center'
+    $sl=New-Object Windows.Controls.Slider; $sl.Style=Res 'Slim'; $sl.VerticalAlignment='Center'; $sl.Ticks=[Windows.Media.DoubleCollection]::Parse(($Presets -join ','))
     $val=New-Object Windows.Controls.TextBlock; $val.Foreground=Res 'Fg'; $val.FontSize=13; $val.FontWeight='Bold'; $val.MinWidth=44; $val.TextAlignment='Right'; $val.VerticalAlignment='Center'
     $sun=New-Object Windows.Controls.TextBlock; $sun.Text='☀'; $sun.Foreground=Res 'MutedBrush'; $sun.VerticalAlignment='Center'; $sun.Margin='0,0,10,0'
     $row=New-Object Windows.Controls.Grid
@@ -216,7 +216,9 @@ function New-BrightControl([bool]$showKeep,[bool]$stack){
         [Windows.Controls.Grid]::SetColumn($row,1); $row.Margin='14,0,0,0'
         [void]$rootEl.Children.Add($segB); [void]$rootEl.Children.Add($row)
     }
-    $bc=[pscustomobject]@{Root=$rootEl;Slider=$sl;Val=$val;Value=$null;Busy=$false;OnChange=$null;Btns=@{};ShowKeep=$showKeep}
+    $hint=New-Object Windows.Controls.TextBlock; $hint.Foreground=Res 'MutedBrush'; $hint.FontSize=11.5; $hint.Margin='2,9,0,0'; $hint.TextWrapping='Wrap'; $hint.Text=Get-BrightHint
+    $outer=New-Object Windows.Controls.StackPanel; [void]$outer.Children.Add($rootEl); [void]$outer.Children.Add($hint); $rootEl=$outer
+    $bc=[pscustomobject]@{Hint=$hint;Root=$rootEl;Slider=$sl;Val=$val;Value=$null;Busy=$false;OnChange=$null;Btns=@{};ShowKeep=$showKeep}
     $keys=@(); if($showKeep){ $keys+='keep' }; $keys+=$Presets
     foreach($k in $keys){
         $b=New-Object Windows.Controls.Primitives.ToggleButton; $b.Style=Res 'SegItem'
@@ -242,7 +244,23 @@ function BC-Set($bc,$v,[switch]$FromSlider){
     } finally { $bc.Busy=$false }
 }
 function BC-IsCustom($bc){ $bc.Value -ne $null -and ($Presets -notcontains [int]$bc.Value) }
-function BC-Relabel($bc){ if($bc.Btns.ContainsKey('keep')){ $bc.Btns['keep'].Content=T 'Keep' }; if($bc.Value -eq $null){ $bc.Val.Text=T 'Keep' } }
+function BC-Relabel($bc){ $bc.Hint.Text=Get-BrightHint; if($bc.Btns.ContainsKey('keep')){ $bc.Btns['keep'].Content=T 'Keep' }; if($bc.Value -eq $null){ $bc.Val.Text=T 'Keep' } }
+
+# Keyboards that have a brightness setting in iCUE, and the hint shown under the brightness controls
+function Get-BrightDevices {
+    try{ $c=[IO.File]::ReadAllText("$cueDir\config.cuecfg")
+         @([regex]::Matches($c,'(?s)<map name="([^"{][^"]*)">\s*<map name="\{[0-9a-fA-F-]+\}">(?:(?!<map name=).)*?<value name="BrightnessLevel">') | % { $_.Groups[1].Value } | Select-Object -Unique) }
+    catch{ @() }
+}
+function Get-BrightHint { $dv=@(Get-BrightDevices); if($dv.Count){ (T 'BrHint') -f ($dv -join ', ') } else { T 'BrHintGen' } }
+# After iCUE restarts it may round the brightness to a supported step; returns a message if it did
+function Check-Rounded($requested){
+    if($requested -eq $null){ return $null }
+    $ic=Get-IcueCfg; if(-not $ic -or $ic.BL -eq $null){ return $null }
+    if([int]$ic.BL -eq [int]$requested){ return $null }
+    $dv=@(Get-BrightDevices); $n='iCUE'; if($dv.Count){ $n=$dv -join ', ' }
+    (T 'Rounded') -f $ic.BL,$n
+}
 
 # 24-hour timeline
 function New-Timeline([hashtable]$o){

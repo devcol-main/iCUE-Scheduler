@@ -84,7 +84,7 @@
                   <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <ContentControl HorizontalContentAlignment="Stretch" x:Name="TempBright" VerticalAlignment="Center"/>
-                    <Button x:Name="BtnTemp" Grid.Column="2" Style="{StaticResource BtnPri}" MinWidth="86"/>
+                    <Button x:Name="BtnTemp" Grid.Column="2" Style="{StaticResource BtnPri}" MinWidth="86" VerticalAlignment="Top" Height="38"/>
                   </Grid>
                 </StackPanel>
               </Border>

@@ -11,7 +11,7 @@ Windows only. Plain PowerShell + WPF, nothing to install.
 
 - **24-hour timeline.** See which profile runs when, with a marker for the current time.
 - **Time slots.** Add as many as you like. Each slot sets a profile and, optionally, keyboard brightness.
-- **Brightness presets and slider.** Keep / 0 / 10 / 25 / 50 / 75 / 100 %, or drag the slider to any value.
+- **Keyboard brightness.** Keep / 0 / 33 / 66 / 100 % buttons, plus a slider that snaps to the same steps. The app shows which keyboard it found and the steps it supports.
 - **Temporary override.** Use another profile or brightness now; the schedule takes over again at the next switch.
 - **Leaves your manual changes alone.** Each slot is applied once, so changes you make in iCUE stay until the next slot starts.
 - **Catches up** after logon or waking from sleep, if a switch was missed.
@@ -79,7 +79,7 @@ It applies the current slot only if it has not been applied in that slot yet.
 ```powershell
 .\Switch-iCUEProfile.ps1                                        # what the scheduled task runs
 .\Switch-iCUEProfile.ps1 -Force                                 # apply the current slot now
-.\Switch-iCUEProfile.ps1 -ProfileName "Gaming" -Brightness 75   # temporary override (-Brightness keep = don't change)
+.\Switch-iCUEProfile.ps1 -ProfileName "Gaming" -Brightness 66   # temporary override (-Brightness keep = don't change)
 ```
 
 ## Files
@@ -103,7 +103,7 @@ It applies the current slot only if it has not been applied in that slot yet.
 ## Notes and limitations
 
 - Every switch restarts iCUE.
-- **Brightness steps depend on your device.** iCUE rounds the value to what the device supports. A K70 RGB RAPIDFIRE, for example, only has 0 / 33 / 66 / 100 %, so 10 → 0, 25 → 33 and 50 → 66. The Home tab always shows the value iCUE actually uses.
+- **Brightness has 4 steps: 0 / 33 / 66 / 100 %.** That is what iCUE uses for keyboards such as the K70 RGB RAPIDFIRE (10 % would become 0 %, 50 % would become 66 %), so the buttons and slider stick to those steps. The detected keyboard is named under the brightness controls. If iCUE ends up storing a different value than requested, the app tells you after applying.
 - Brightness uses iCUE's device brightness setting and is applied to every device that has one.
 - It reads and edits iCUE's own settings files, which are not documented. A future iCUE update could change them and break this tool.
 - Profile names must match iCUE exactly. The app warns you when a name is not found.
