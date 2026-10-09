@@ -1,0 +1,194 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="iCUE Scheduler" Width="900" Height="690" WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="CanMinimize"
+        FontFamily="Segoe UI Variable Text, Segoe UI, Malgun Gothic" FontSize="13" UseLayoutRounding="True" SnapsToDevicePixels="True">
+  <Window.Resources><!--THEME--></Window.Resources>
+  <Grid Margin="16">
+    <Border CornerRadius="16" Background="{StaticResource Bg}" BorderBrush="#232835" BorderThickness="1">
+      <Border.Effect><DropShadowEffect BlurRadius="26" ShadowDepth="0" Opacity="0.6" Color="#000000"/></Border.Effect>
+      <Grid>
+        <Grid.ColumnDefinitions><ColumnDefinition Width="176"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <Border Background="{StaticResource NavBg}" CornerRadius="16,0,0,16" BorderBrush="#1A1E28" BorderThickness="0,0,1,0"/>
+        <DockPanel Margin="12,0,12,14">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Height="56" Margin="8,0,0,6">
+            <Image x:Name="AppIcon" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock x:Name="L_Title" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Fg}" VerticalAlignment="Center"/>
+          </StackPanel>
+          <TextBlock x:Name="L_Ver" DockPanel.Dock="Bottom" Style="{StaticResource Muted}" Foreground="{StaticResource Dim}" Margin="12,0,0,0"/>
+          <StackPanel>
+            <ToggleButton x:Name="NavHome" Style="{StaticResource NavItem}"><StackPanel Orientation="Horizontal">
+              <Path Width="16" Height="16" Stretch="Uniform" Data="M2,7.5 L8,2.5 L14,7.5 L14,14 L2,14 Z" StrokeThickness="1.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Margin="0,0,12,0"/>
+              <TextBlock x:Name="T_NavHome"/></StackPanel></ToggleButton>
+            <ToggleButton x:Name="NavSched" Style="{StaticResource NavItem}"><StackPanel Orientation="Horizontal">
+              <Path Width="16" Height="16" Stretch="Uniform" Data="M8,2 A6,6 0 1 1 7.99,2 M8,4.8 L8,8 L10.5,9.5" StrokeThickness="1.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Margin="0,0,12,0"/>
+              <TextBlock x:Name="T_NavSched"/></StackPanel></ToggleButton>
+            <ToggleButton x:Name="NavLog" Style="{StaticResource NavItem}"><StackPanel Orientation="Horizontal">
+              <Path Width="16" Height="16" Stretch="Uniform" Data="M3,4 L13,4 M3,8 L13,8 M3,12 L9,12" StrokeThickness="1.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Margin="0,0,12,0"/>
+              <TextBlock x:Name="T_NavLog"/></StackPanel></ToggleButton>
+            <ToggleButton x:Name="NavSettings" Style="{StaticResource NavItem}"><StackPanel Orientation="Horizontal">
+              <Path Width="16" Height="16" Stretch="Uniform" Data="M8,5.6 A2.4,2.4 0 1 1 7.99,5.6 M8,1.5 L8,3.5 M8,12.5 L8,14.5 M1.5,8 L3.5,8 M12.5,8 L14.5,8 M3.4,3.4 L4.8,4.8 M11.2,11.2 L12.6,12.6 M3.4,12.6 L4.8,11.2 M11.2,4.8 L12.6,3.4" StrokeThickness="1.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Margin="0,0,12,0"/>
+              <TextBlock x:Name="T_NavSettings"/></StackPanel></ToggleButton>
+          </StackPanel>
+        </DockPanel>
+        <Grid Grid.Column="1">
+          <Grid.RowDefinitions><RowDefinition Height="44"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+          <Grid x:Name="TitleBar" Background="Transparent">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
+              <Button x:Name="BtnMin" Style="{StaticResource BtnGhost}" Content="—"/>
+              <Button x:Name="BtnClose" Style="{StaticResource BtnGhost}" Content="✕"/>
+            </StackPanel>
+          </Grid>
+          <Grid Grid.Row="1" Margin="22,0,24,22">
+
+            <!-- ============ HOME ============ -->
+            <StackPanel x:Name="PageHome">
+              <TextBlock x:Name="H_Home" Style="{StaticResource H1}" Margin="0,0,0,14"/>
+              <Border Style="{StaticResource Card}" Margin="0,0,0,10">
+                <Grid>
+                  <StackPanel>
+                    <TextBlock x:Name="L_Now" Style="{StaticResource Muted}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                      <Ellipse x:Name="CurDot" Width="11" Height="11" Fill="#9B7BFF" VerticalAlignment="Center" Margin="0,3,11,0">
+                        <Ellipse.Effect><DropShadowEffect x:Name="CurGlow" BlurRadius="14" ShadowDepth="0" Color="#9B7BFF" Opacity="0.9"/></Ellipse.Effect>
+                      </Ellipse>
+                      <TextBlock x:Name="CurName" FontSize="25" FontWeight="Bold" Foreground="{StaticResource Fg}"/>
+                    </StackPanel>
+                    <TextBlock x:Name="CurWhen" Foreground="{StaticResource Fg2}" FontSize="12.5" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="CurState" FontSize="12" Margin="0,4,0,0"/>
+                  </StackPanel>
+                  <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock x:Name="L_BrightNow" Style="{StaticResource Muted}" HorizontalAlignment="Right"/>
+                    <TextBlock x:Name="CurBright" FontSize="25" FontWeight="Bold" Foreground="{StaticResource Fg}" HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                    <Grid Width="120" Height="5" Margin="0,8,0,0"><Border Background="#262B38" CornerRadius="3"/><Border x:Name="CurBrightBar" Background="{StaticResource Fg}" CornerRadius="3" HorizontalAlignment="Left" Width="0"/></Grid>
+                  </StackPanel>
+                </Grid>
+              </Border>
+              <Border Style="{StaticResource Card}" Margin="0,0,0,10">
+                <StackPanel><ContentControl HorizontalContentAlignment="Stretch" x:Name="HomeTL"/><WrapPanel x:Name="HomeLegend" Margin="0,10,0,0"/></StackPanel>
+              </Border>
+              <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Style="{StaticResource Card}" Padding="16,12"><StackPanel Orientation="Horizontal">
+                  <ToggleButton x:Name="TglEnabled" Style="{StaticResource Switch}" VerticalAlignment="Center"/>
+                  <StackPanel Margin="12,0,0,0" VerticalAlignment="Center"><TextBlock x:Name="L_Auto" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_AutoSub" Style="{StaticResource Muted}" Margin="0,1,0,0"/></StackPanel>
+                </StackPanel></Border>
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16,12"><StackPanel Orientation="Horizontal">
+                  <Ellipse x:Name="TaskDot" Width="9" Height="9" Fill="{StaticResource Good}" VerticalAlignment="Center" Margin="4,0,6,0"/>
+                  <StackPanel Margin="8,0,0,0" VerticalAlignment="Center"><TextBlock x:Name="L_Task" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_TaskSub" Style="{StaticResource Muted}" Margin="0,1,0,0"/></StackPanel>
+                </StackPanel></Border>
+              </Grid>
+              <Border Style="{StaticResource Card}">
+                <StackPanel>
+                  <Grid><TextBlock x:Name="L_Temp" Style="{StaticResource H2}"/><TextBlock x:Name="L_TempNote" Style="{StaticResource Muted}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+                  <WrapPanel x:Name="TempChips" Margin="0,12,0,4"/>
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <ContentControl HorizontalContentAlignment="Stretch" x:Name="TempBright" VerticalAlignment="Center"/>
+                    <Button x:Name="BtnTemp" Grid.Column="2" Style="{StaticResource BtnPri}" MinWidth="86"/>
+                  </Grid>
+                </StackPanel>
+              </Border>
+            </StackPanel>
+
+            <!-- ============ SCHEDULE ============ -->
+            <Grid x:Name="PageSched" Visibility="Collapsed">
+              <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+              <Grid Margin="0,0,0,14">
+                <TextBlock x:Name="H_Sched" Style="{StaticResource H1}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                  <TextBlock x:Name="L_Unsaved" Foreground="{StaticResource Warn}" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0" Visibility="Collapsed"/>
+                  <Button x:Name="BtnApplySched" Style="{StaticResource Btn}" Margin="0,0,8,0"/>
+                  <Button x:Name="BtnSave" Style="{StaticResource BtnPri}" MinWidth="80"/>
+                </StackPanel>
+              </Grid>
+              <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,12"><ContentControl HorizontalContentAlignment="Stretch" x:Name="SchedTL"/></Border>
+              <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="240"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                  <StackPanel><StackPanel x:Name="SlotList"/><Button x:Name="BtnAdd" Style="{StaticResource BtnDash}"/></StackPanel>
+                </ScrollViewer>
+                <Border Grid.Column="2" Style="{StaticResource Card}" VerticalAlignment="Top">
+                  <StackPanel>
+                    <TextBlock x:Name="L_Start" Style="{StaticResource Muted}"/>
+                    <Grid Margin="0,6,0,14">
+                      <TextBox x:Name="EdTime" Style="{StaticResource Input}" MaxLength="5"/>
+                      <TextBlock x:Name="EdRange" Style="{StaticResource Muted}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" IsHitTestVisible="False"/>
+                    </Grid>
+                    <TextBlock x:Name="L_Prof" Style="{StaticResource Muted}"/>
+                    <ComboBox x:Name="EdProfile" Style="{StaticResource Drop}" Height="40" Margin="0,6,0,14"/>
+                    <Grid><TextBlock x:Name="L_Br" Style="{StaticResource Muted}"/><TextBlock x:Name="EdCustom" Foreground="#B9AEFF" FontSize="12" HorizontalAlignment="Right"/></Grid>
+                    <ContentControl HorizontalContentAlignment="Stretch" x:Name="EdBright" Margin="0,7,0,0"/>
+                    <Button x:Name="BtnDel" Style="{StaticResource BtnDanger}" HorizontalAlignment="Right" Margin="0,16,0,0"/>
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </Grid>
+
+            <!-- ============ LOG ============ -->
+            <Grid x:Name="PageLog" Visibility="Collapsed">
+              <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+              <Grid Margin="0,0,0,14">
+                <TextBlock x:Name="H_Log" Style="{StaticResource H1}"/>
+                <Button x:Name="BtnFolder" Style="{StaticResource Btn}" HorizontalAlignment="Right"/>
+              </Grid>
+              <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16,12">
+                <TextBox x:Name="LogBox" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="#AEB5C8" FontFamily="Cascadia Mono, Consolas, Malgun Gothic" FontSize="12.5"
+                         TextWrapping="NoWrap" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" IsReadOnlyCaretVisible="False"/>
+              </Border>
+            </Grid>
+
+            <!-- ============ SETTINGS ============ -->
+            <StackPanel x:Name="PageSettings" Visibility="Collapsed">
+              <TextBlock x:Name="H_Settings" Style="{StaticResource H1}" Margin="0,0,0,14"/>
+              <Border Style="{StaticResource Card}" Padding="0" Margin="0,0,0,10">
+                <StackPanel>
+                  <Grid Margin="16,13">
+                    <StackPanel><TextBlock x:Name="L_Lang" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_LangSub" Style="{StaticResource Muted}" Margin="0,2,0,0"/></StackPanel>
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="{StaticResource Card2}" CornerRadius="9" Padding="3">
+                      <StackPanel Orientation="Horizontal">
+                        <ToggleButton x:Name="LangEn" Style="{StaticResource SegItem}" Content="EN" MinWidth="44"/>
+                        <ToggleButton x:Name="LangKo" Style="{StaticResource SegItem}" Content="한국어" MinWidth="44"/>
+                      </StackPanel>
+                    </Border>
+                  </Grid>
+                  <Border Height="1" Background="{StaticResource Line}"/>
+                  <Grid Margin="16,13">
+                    <StackPanel Margin="0,0,70,0"><TextBlock x:Name="L_Tray" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_TraySub" Style="{StaticResource Muted}" Margin="0,2,0,0" TextWrapping="Wrap"/></StackPanel>
+                    <ToggleButton x:Name="TglTray" Style="{StaticResource Switch}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Border Height="1" Background="{StaticResource Line}"/>
+                  <Grid Margin="16,13">
+                    <StackPanel Margin="0,0,70,0"><TextBlock x:Name="L_TrayStart" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_TrayStartSub" Style="{StaticResource Muted}" Margin="0,2,0,0"/></StackPanel>
+                    <ToggleButton x:Name="TglTrayStart" Style="{StaticResource Switch}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                  </Grid>
+                </StackPanel>
+              </Border>
+              <Border Style="{StaticResource Card}" Padding="0">
+                <StackPanel>
+                  <Grid Margin="16,12">
+                    <StackPanel><TextBlock x:Name="L_FolderT" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_FolderSub" Style="{StaticResource Muted}" Margin="0,2,0,0"/></StackPanel>
+                    <Button x:Name="BtnOpenFolder" Style="{StaticResource Btn}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Border Height="1" Background="{StaticResource Line}"/>
+                  <Grid Margin="16,12">
+                    <StackPanel><TextBlock x:Name="L_Rereg" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_ReregSub" Style="{StaticResource Muted}" Margin="0,2,0,0"/></StackPanel>
+                    <Button x:Name="BtnRereg" Style="{StaticResource Btn}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Border Height="1" Background="{StaticResource Line}"/>
+                  <Grid Margin="16,12">
+                    <StackPanel><TextBlock x:Name="L_About" Style="{StaticResource H2}" FontSize="13"/><TextBlock x:Name="L_AboutSub" Style="{StaticResource Muted}" Margin="0,2,0,0"/></StackPanel>
+                    <Button x:Name="BtnGitHub" Style="{StaticResource Btn}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                  </Grid>
+                </StackPanel>
+              </Border>
+            </StackPanel>
+
+          </Grid>
+        </Grid>
+      </Grid>
+    </Border>
+    <Border x:Name="Toast" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="176,0,0,34" Padding="18,11" CornerRadius="12" Background="#232A3D" BorderBrush="#3A4468" BorderThickness="1">
+      <TextBlock x:Name="ToastText" Foreground="White" FontSize="13"/>
+    </Border>
+  </Grid>
+</Window>
