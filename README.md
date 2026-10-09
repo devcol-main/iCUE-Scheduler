@@ -101,4 +101,4 @@ Use it at your own risk. A backup of the iCUE config is saved before every chang
 
 ## License
 
-[MIT](LICENSE)
+[Apache License 2.0](LICENSE)

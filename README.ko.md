@@ -101,4 +101,4 @@ iCUE가 재시작되는 몇 초 동안 조명이 꺼집니다.
 
 ## 라이선스
 
-[MIT](LICENSE)
+[Apache License 2.0](LICENSE)
