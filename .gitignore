@@ -1,0 +1,8 @@
+# Local settings and runtime files
+schedule.json
+state.json
+scheduler.log
+scheduler.log.old
+gui-error.log
+gui-stderr.txt
+*.bak
