@@ -1,19 +1,25 @@
 # iCUE Scheduler
 
 Switch your Corsair iCUE 5 profile and keyboard brightness automatically by time of day.
-Windows only. Plain PowerShell, nothing to install.
+Windows only. Plain PowerShell + WPF, nothing to install.
 
 **English** | [한국어](README.ko.md)
 
+<p align="center"><img src="docs/home.png" width="720" alt="iCUE Scheduler home tab"></p>
+
 ## Features
 
-- **Time-based profile switching.** Add as many time slots as you like.
-- **Keyboard brightness per slot** (optional): 0 / 33 / 66 / 100 %.
-- **Temporary override.** Use a different profile now; the schedule takes over again at the next switch.
-- **Leaves your manual changes alone.** Each slot is applied once, so if you change the profile in iCUE yourself, it stays until the next slot starts.
+- **24-hour timeline.** See which profile runs when, with a marker for the current time.
+- **Time slots.** Add as many as you like. Each slot sets a profile and, optionally, keyboard brightness.
+- **Brightness presets and slider.** Keep / 0 / 10 / 25 / 50 / 75 / 100 %, or drag the slider to any value.
+- **Temporary override.** Use another profile or brightness now; the schedule takes over again at the next switch.
+- **Leaves your manual changes alone.** Each slot is applied once, so changes you make in iCUE stay until the next slot starts.
 - **Catches up** after logon or waking from sleep, if a switch was missed.
-- **Dark GUI** in English and Korean. You can switch the language in the title bar.
-- Runs from Windows Task Scheduler, so nothing stays running in the background.
+- **Optional tray widget** for one-click switching from the taskbar.
+- English and Korean UI.
+- The schedule itself runs from Windows Task Scheduler, so nothing has to stay running.
+
+<p align="center"><img src="docs/schedule.png" width="560" alt="Schedule tab"> <img src="docs/tray.png" width="250" alt="Tray widget"></p>
 
 ## Requirements
 
@@ -33,21 +39,27 @@ Windows only. Plain PowerShell, nothing to install.
    powershell -ExecutionPolicy Bypass -File .\Install.ps1
    ```
    This registers the scheduled task **iCUE Profile Scheduler** and puts an **iCUE Scheduler** shortcut on your desktop.
-4. Open **iCUE Scheduler**, set your times and profiles, and press **Save**.
+4. Open **iCUE Scheduler**, set up your time slots in the **Schedule** tab, and press **Save**.
    Profile names come from iCUE, so create your profiles in iCUE first.
 
-## Using the GUI
+## The app
 
-| Section | What it does |
+| Tab | What it does |
 |---|---|
-| Status cards | Current iCUE profile, keyboard brightness, and the next switch |
-| Auto switching | Turns the whole schedule on or off |
-| Schedule | Start time, profile, and brightness for each slot. **Save** writes the settings and updates the scheduled task. **Apply now** applies the current slot immediately |
-| Temporary override | Applies a profile and brightness right away until the next scheduled switch |
-| Recent activity | The last few switches |
+| **Home** | Current profile and brightness, today's timeline, auto switching on/off, Task Scheduler status, and the temporary override |
+| **Schedule** | Timeline plus a list of time slots. Pick a slot to edit its start time, profile and brightness. **Save** stores the schedule and updates the scheduled task. **Apply now** applies the current slot immediately |
+| **Activity** | Every switch, newest first |
+| **Settings** | Language, tray widget, start the tray widget with Windows, open folder, re-register the scheduled task |
 
 A slot runs from its start time until the next start time, wrapping past midnight.
 With `07:00 Default` and `23:00 Night`, *Night* is used from 23:00 to 07:00.
+
+### Tray widget (optional)
+
+Turn it on in **Settings → Tray widget**. Left-click the tray icon for a quick panel with
+profile tiles, brightness and a mini timeline; right-click for a menu.
+Anything you pick there is a temporary override until the next switch.
+While it is on, the widget keeps running in the background. Time-based switching does not depend on it.
 
 ## How it works
 
@@ -65,34 +77,36 @@ It applies the current slot only if it has not been applied in that slot yet.
 ## Command line
 
 ```powershell
-.\Switch-iCUEProfile.ps1                                    # what the scheduled task runs
-.\Switch-iCUEProfile.ps1 -Force                             # apply the current slot now
-.\Switch-iCUEProfile.ps1 -ProfileName "Gaming" -Brightness 66   # temporary override (-Brightness keep = don't change)
+.\Switch-iCUEProfile.ps1                                        # what the scheduled task runs
+.\Switch-iCUEProfile.ps1 -Force                                 # apply the current slot now
+.\Switch-iCUEProfile.ps1 -ProfileName "Gaming" -Brightness 75   # temporary override (-Brightness keep = don't change)
 ```
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `iCUE-Scheduler.vbs` | Starts the GUI without a console window (the desktop shortcut points here) |
-| `iCUE-Scheduler.ps1`, `iCUE-Scheduler.xaml` | GUI |
+| `iCUE-Scheduler.vbs` | Opens the app without a console window (the desktop shortcut points here) |
+| `iCUE-Tray.vbs` | Starts the tray widget |
+| `ui/` | App code: `MainWindow`, `Tray`, shared `Common.ps1` and `Theme.xaml` |
 | `Switch-iCUEProfile.ps1` | Does the actual switch |
 | `run-hidden.vbs` | Lets the scheduled task run the switch script without a console window |
-| `Install.ps1` / `Uninstall.ps1` | Register or remove the scheduled task and desktop shortcut |
+| `Install.ps1` / `Uninstall.ps1` | Register or remove the scheduled task and shortcuts |
 | `schedule.example.json` | Starting settings, copied to `schedule.json` on first install |
 | `schedule.json`, `state.json`, `scheduler.log` | Your settings, last applied state, and log (created locally, not in git) |
 
 ## Moving or removing
 
-- **Moved the folder?** Run `Install.ps1` again. The task and shortcut point to the folder's location.
+- **Moved the folder?** Run `Install.ps1` again, or use **Settings → Re-register scheduled task**.
 - **Uninstall:** run `Uninstall.ps1`, then delete the folder.
 
 ## Notes and limitations
 
 - Every switch restarts iCUE.
+- **Brightness steps depend on your device.** iCUE rounds the value to what the device supports. A K70 RGB RAPIDFIRE, for example, only has 0 / 33 / 66 / 100 %, so 10 → 0, 25 → 33 and 50 → 66. The Home tab always shows the value iCUE actually uses.
+- Brightness uses iCUE's device brightness setting and is applied to every device that has one.
 - It reads and edits iCUE's own settings files, which are not documented. A future iCUE update could change them and break this tool.
-- Brightness uses iCUE's device brightness setting and is applied to every device that has one. It was developed with a K70 RGB RAPIDFIRE keyboard. Other devices are untested.
-- Profile names must match iCUE exactly. The GUI warns you when a name is not found.
+- Profile names must match iCUE exactly. The app warns you when a name is not found.
 
 ## Disclaimer
 

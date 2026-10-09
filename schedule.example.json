@@ -1,6 +1,8 @@
 {
   "language": "en",
   "enabled": true,
+  "trayEnabled": false,
+  "trayStartup": false,
   "schedule": [
     { "time": "07:00", "profile": "Default", "brightness": null },
     { "time": "23:00", "profile": "Night",   "brightness": 33 }

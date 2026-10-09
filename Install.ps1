@@ -54,6 +54,12 @@ if (-not $NoShortcut) {
     $lnk.Description = "iCUE Scheduler"
     $lnk.Save()
 }
+# Keep the tray widget startup entry pointing at this folder
+$startLnk = Join-Path ([Environment]::GetFolderPath('Startup')) 'iCUE Scheduler Tray.lnk'
+if ($conf.trayStartup -eq $true) {
+    $ws2 = New-Object -ComObject WScript.Shell; $s2 = $ws2.CreateShortcut($startLnk)
+    $s2.TargetPath = "$env:WINDIR\System32\wscript.exe"; $s2.Arguments = "`"$dir\iCUE-Tray.vbs`""; $s2.WorkingDirectory = $dir; $s2.Save()
+}
 if (-not $Quiet) {
     Write-Host "Installed: task 'iCUE Profile Scheduler' ($($Times -join ', '))"
     if (-not $NoShortcut) { Write-Host "Desktop shortcut: iCUE Scheduler" }
